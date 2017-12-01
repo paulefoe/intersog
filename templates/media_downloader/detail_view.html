@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+{% block title %}
+    {{ object.title }}
+{% endblock %}
+
+{% block content %}
+ <div class="col-md-7">
+        <h2>{{ object.title }}</h2>
+     {% if video %}
+    <video width="720" height="560" controls class="rounded float-right">
+    <source src="{{ object.file.url }}" type="video/mp4">
+    </video>
+         {% else %}
+         <img src="{{ object.file.url }}" class="img-fluid">
+     {% endif %}
+    <p>{{ object.description }}</p>
+    <p>{{ object.date }}</p>
+    </div>
+
+<form id="form_post" class="text-center" class="form-post" enctype="multipart/form-data"
+      action="{% url 'detail_view' object.pk  %}" method="post">
+      {% csrf_token %}
+        {{ form|crispy }}
+
+     <p><input type="submit" value="Отправить"></p>
+ </form>
+
+
+{% endblock %}

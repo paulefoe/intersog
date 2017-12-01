@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+{% block title %}
+   Add from facebook
+{% endblock %}
+{% block content %}
+
+{% if error %}
+
+<p class="errors">{{ error }}</p>
+
+{% endif %}
+<form id="form_post" class="text-center" class="form-post" enctype="multipart/form-data"
+      action="{% url 'add_from_fb' %}" method="post">
+      {% csrf_token %}
+ {{ add_from_fb|crispy }}
+
+ <p><input type="submit" value="Отправить"></p>
+ </form>
+{% endblock %}

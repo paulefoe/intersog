@@ -1,0 +1,43 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>{% block title %} {% endblock %}</title>
+<link rel="stylesheet" href="{% static 'bootstrap/css/bootstrap.min.css' %}"
+      integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+
+</head>
+<body>
+<div class="container">
+<div class="jumbotron">
+<a href="{% url 'add_file' %}"><img src="{% static "images/logo.png" %}" ></a>
+<a href="{% url 'video_gallery' %}"> <button type="button" class="btn btn-default btn-lg">
+  <span class="glyphicon glyphicon-facetime-video" aria-hidden="true"></span> Videos
+</button></a>
+
+<a href="{% url 'pic-gallery' %}"> <button type="button" class="btn btn-default btn-lg">
+  <span class="glyphicon glyphicon-picture" aria-hidden="true"></span> Pictures
+</button></a>
+
+<a href="{% url 'add_file' %}"> <button type="button" class="btn btn-default btn-lg">
+  <span class="glyphicon glyphicon-upload" aria-hidden="true"></span> Upload from PC
+</button></a>
+
+    <a href="{% url 'add_from_fb' %}"> <button type="button" class="btn btn-default btn-lg">
+  <span class="glyphicon glyphicon-upload" aria-hidden="true"></span> Upload from Facebook
+</button></a>
+
+</div>
+    {% block content %}
+    {% endblock %}
+
+</div>
+
+<script src="{% static 'js/jquery-3.2.1.min.js' %}"></script>
+<script src="{% static 'bootstrap/js/bootstrap.min.js' %}"></script>
+
+</body>
+</html>

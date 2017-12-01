@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+  {% block title %}
+  Add from PC
+  {% endblock %}
+{% block content %}
+ <form id="form_post" class="form-post" enctype="multipart/form-data" action="." method="post">
+      {% csrf_token %}
+ {{ form|crispy }}
+ <p><input type="submit" value="Отправить"></p>
+ </form>
+{% endblock %}

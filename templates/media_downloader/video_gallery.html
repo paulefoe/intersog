@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+    {% block title %}
+
+    {% endblock %}
+{% block content %}
+    {% for object in object_list %}
+        <div class="col-md-7">
+        <a href="{% url 'detail_view' object.pk %}"> <h2>{{ object.title }}</h2></a>
+    <video width="720" height="560" controls class="rounded float-right">
+    <source src="{{ object.file.url }}" type="video/mp4">
+    </video>
+
+    <p>{{ object.description }}</p>
+    <p>{{ object.date }}</p>
+    </div>
+
+    {% endfor %}
+
+
+
+
+{% endblock %}
