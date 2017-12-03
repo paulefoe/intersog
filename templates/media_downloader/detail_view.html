@@ -5,14 +5,14 @@
 {% endblock %}
 
 {% block content %}
- <div class="col-md-7">
+ <div class="col-md-7" id="picvid">
         <h2>{{ object.title }}</h2>
      {% if video %}
     <video width="720" height="560" controls class="rounded float-right">
     <source src="{{ object.file.url }}" type="video/mp4">
     </video>
          {% else %}
-         <img src="{{ object.file.url }}" class="img-fluid">
+         <img src="{{ object.file.url }}" class="img-fluid" id="picture">
      {% endif %}
     <p>{{ object.description }}</p>
     <p>{{ object.date }}</p>
@@ -22,7 +22,6 @@
       action="{% url 'detail_view' object.pk  %}" method="post">
       {% csrf_token %}
         {{ form|crispy }}
-
      <p><input type="submit" value="Отправить"></p>
  </form>
 

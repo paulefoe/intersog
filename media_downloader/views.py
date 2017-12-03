@@ -36,15 +36,17 @@ def add_file(request):
 
 
 def add_file_from_fb(request):
-    """Принимает ссылки вида https://www.facebook.com/DonaldTrump/videos/10160223819690725/ для видео
-    и https://www.facebook.com/DonaldTrump/photos/a.10156483516640725.1073741830.153080620724/10160223686260725/
-    для фото
+    """Accepting urls like this https://www.facebook.com/DonaldTrump/videos/10160223819690725/ for videos
+    and like this
+     https://www.facebook.com/DonaldTrump/photos/a.10156483516640725.1073741830.153080620724/10160223686260725/
+    for photos
     """
     if request.method == 'POST':
         add_from_fb = AddFromFacebookForm(request.POST)
         if add_from_fb.is_valid():
             html, data = urllib.request.urlretrieve(add_from_fb.cleaned_data['url'])
             with open(html) as h:
+                initial_url = add_from_fb.cleaned_data['url'].split('&')[0]
                 video_url = ''
                 description_tag = ''
                 dt = (data['date'])
@@ -55,7 +57,7 @@ def add_file_from_fb(request):
 
                 try:
                     description_tag = soup.find_all("div", class_="hidden_elem")[1]
-                    # Регулярное выражение, чтобы достать описание
+                    # Regular expression to execute description
                     reg = re.compile('(<p>)(.*)(</p>)')
                     description_list = reg.findall(str(description_tag))
                     description = description_list[0][1]
@@ -63,18 +65,26 @@ def add_file_from_fb(request):
                     description = 'No description were provided'
 
                 try:
-                    # удалить все html тэги из описания
+                    # delete all html tags from description
                     description = re.sub('<[^<>]+>', '', description)
-                    # Регулярное выражение для картинки в которой есть описание
+                    # regular expression for the picture that contain description
+                    # (an actual description within a post, not a variable)
                     pic = re.compile('(<img class="scaledImageFitWidth img" src=")(.*)(?=" alt=")')
-                    # Регулярное выражение для картинки, в которой нет описания
+                    # regular expression for the picture that do not contain description
                     pic2 = re.compile('(<img class="_46-i img" src=")(.*)(?=" style="left)')
                     parsed_pic = pic.findall(str(description_tag))
                     if not parsed_pic:
                         parsed_pic = pic2.findall(str(description_tag))
-                        print(description_tag)
                     parsed_link = parsed_pic[0][1]
                     final_link = parsed_link.replace('&amp;', '&')
+
+                    # If it's a post with a lot of photos,
+                    # the final_link will contain the download links for all of the pics in posts,
+                    # 500 is chosen just because it seems like something reasonable
+                    if len(final_link) > 500:
+                        final_link = final_link.split(initial_url)[1]
+                        pic3 = re.compile('(data-ploi=")(.*)(?=" data-plsi=)')
+                        final_link = pic3.findall(final_link)[0][1]
                 except IndexError:
                     final_link = ''
 
@@ -82,16 +92,16 @@ def add_file_from_fb(request):
                     urllib.request.urlretrieve(final_link, 'media/files/new_pic.jpeg')
                     path = os.path.join('media', 'files', 'new_pic.jpeg')
                 else:
-                    # Парсинг видео
-                    # Сначало найти <script> тэг в котором хранится ссылка на реальное видео.
+                    # Video parsing
+                    # First find a <script> tag where an actual link to the video exists
                     for link in soup.find_all('script'):
                         hd_src = link.find(string=re.compile("hd_src"))
                         if hd_src:
-                            # Регулярное выражение, чтобы найти ссылку
+                            # Regular expression to find this link
                             p = re.compile('(hd_src_no_ratelimit:")(.*)(?=",aspect_ratio)')
                             parsed = p.findall(hd_src)
-                            # hd_src всегда есть в тэге скрипта, но в случае отсутствие hd разрешениея, оно
-                            # равняется null в таком случае, скачать sd разрешение.
+                            # hd_src always exists in <script> tag, but if the video in not taken in hd quality,
+                            #  hd_src equals to null, so we need to find an sd quality
                             if not parsed:
                                 sd = re.compile('(sd_src:")(.*)(?=",hd_tag)')
                                 parsed = sd.findall(hd_src)
@@ -105,7 +115,6 @@ def add_file_from_fb(request):
                     media = MediaDownloader()
                     media.title = title
                     media.description = description
-                    print(dt)
                     media.date = date
                     local_file = open(path, 'rb')
                     djangofile = File(local_file)
@@ -124,7 +133,7 @@ def add_file_from_fb(request):
 
 
 class VideosListView(ListView):
-    """Возвращает все видео"""
+    """Returns all videos"""
     model = MediaDownloader
     template_name = 'media_downloader/video_gallery.html'
 
@@ -139,7 +148,7 @@ class VideosListView(ListView):
 
 
 class PicListView(ListView):
-    """Возвращает все картинки"""
+    """Returns all pictures"""
     model = MediaDownloader
     template_name = 'media_downloader/pic_gallery.html'
 
@@ -155,6 +164,7 @@ class PicListView(ListView):
 
 
 class VideoPicDetailView(DetailView):
+    """A detail view for both pictures and videos"""
     model = MediaDownloader
     template_name = 'media_downloader/detail_view.html'
 
