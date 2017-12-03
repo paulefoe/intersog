@@ -46,6 +46,7 @@ def add_file_from_fb(request):
             html, data = urllib.request.urlretrieve(add_from_fb.cleaned_data['url'])
             with open(html) as h:
                 video_url = ''
+                description_tag = ''
                 dt = (data['date'])
                 date = time.strptime(dt, "%a, %d %b %Y %H:%M:%S %Z")
                 date = datetime.fromtimestamp(time.mktime(date))
@@ -60,13 +61,18 @@ def add_file_from_fb(request):
                     description = description_list[0][1]
                 except IndexError:
                     description = 'No description were provided'
-                    description_tag = ''
 
                 try:
                     # удалить все html тэги из описания
                     description = re.sub('<[^<>]+>', '', description)
+                    # Регулярное выражение для картинки в которой есть описание
                     pic = re.compile('(<img class="scaledImageFitWidth img" src=")(.*)(?=" alt=")')
+                    # Регулярное выражение для картинки, в которой нет описания
+                    pic2 = re.compile('(<img class="_46-i img" src=")(.*)(?=" style="left)')
                     parsed_pic = pic.findall(str(description_tag))
+                    if not parsed_pic:
+                        parsed_pic = pic2.findall(str(description_tag))
+                        print(description_tag)
                     parsed_link = parsed_pic[0][1]
                     final_link = parsed_link.replace('&amp;', '&')
                 except IndexError:
